@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kart2Grid - STEK Application Summary</title>
+    
+    <!-- Load Chart.js for the Cost Circle -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --stek-blue: #0A2540;
+            --stek-green: #00A859;
+            --text-dark: #202124;
+            --text-muted: #5F6368;
+            --bg-light: #F8F9FA;
+            --border-color: #DADCE0;
+            
+            /* Chart Colors */
+            --color-lead: #0A2540;
+            --color-xr: #00A3E0;
+            --color-aurinko: #00A859;
+            --color-varia: #D2611A;
+            --color-sub: #78909C;
+            --color-pur: #CFD8DC;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #FFFFFF;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        .header {
+            border-bottom: 3px solid var(--stek-green);
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: var(--stek-blue);
+            font-size: 2.8em;
+            margin: 0 0 10px 0;
+            line-height: 1.2;
+        }
+
+        .header h2 {
+            color: var(--text-muted);
+            font-size: 1.4em;
+            font-weight: 400;
+            margin: 0 0 20px 0;
+        }
+
+        .meta-tags {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--stek-blue);
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* Section Styling */
+        h3 {
+            color: var(--stek-blue);
+            font-size: 1.5em;
+            margin-top: 0;
+            border-bottom: 2px solid var(--bg-light);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Value Proposition Cards */
+        .card {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-top: 4px solid var(--stek-green);
+            padding: 25px;
+            border-radius: 8px;
+        }
+
+        .card h4 {
+            margin: 0 0 10px 0;
+            color: var(--stek-blue);
+            font-size: 1.2em;
+        }
+
+        /* Budget Section */
+        .budget-container {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            gap: 40px;
+        }
+
+        .chart-container {
+            width: 40%;
+            position: relative;
+        }
+
+        .chart-center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-weight: bold;
+            color: var(--stek-blue);
+        }
+
+        .chart-center-text .total {
+            font-size: 1.5em;
+            line-height: 1;
+        }
+
+        .chart-center-text .label {
+            font-size: 0.8em;
+            color: var(--text-muted);
+        }
+
+        .budget-legend {
+            width: 60%;
+        }
+
+        .legend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .legend-item:last-child {
+            border-bottom: none;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .rule-badge {
+            font-size: 0.75em;
+            background-color: #E8F0FE;
+            color: #1967D2;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        /* STEK Criteria Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--stek-blue);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--bg-light);
+        }
+
+        .criterion {
+            font-weight: 600;
+            color: var(--stek-blue);
+            width: 25%;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Kart2Grid Educational Program</h1>
+            <h2>Application Concept Brief for STEK Call 2027–2031</h2>
+            <div class="meta-tags">
+                <span class="meta-tag">Budget: €1,000,000</span>
+                <span class="meta-tag">Duration: 2027–2031 (3 Phases)</span>
+                <span class="meta-tag">Format: Open Learning Modules</span>
+                <span class="meta-tag">Target: VET & Higher Education</span>
+            </div>
+        </div>
+
+        <!-- The Core Concept -->
+        <div class="grid-2">
+            <div>
+                <h3>The 2035 Challenge</h3>
+                <p>By 2035, Artificial Intelligence will handle much of the calculating and diagnosing in the energy sector. However, energy specialists must still understand physical phenomena and work safely on high-voltage equipment.</p>
+                <p><strong>The problem:</strong> Providing hands-on experience with 800V systems (like EV batteries or grid storage) is dangerous, expensive, and difficult to scale in standard vocational colleges. <strong>Kart2Grid makes it scalable and safe.</strong></p>
+            </div>
+            <div>
+                <h3>The Consortium</h3>
+                <p>Our consortium perfectly balances academic rigor, vocational reality, and technological innovation to meet STEK requirements:</p>
+                <ul style="padding-left: 20px;">
+                    <li><strong>Lead University (LUT / HY):</strong> Program direction, academic validation, and scaling via the Teacher Academy.</li>
+                    <li><strong>Varia (VET Partner):</strong> Vocational piloting, pedagogical integration, and workplace learning.</li>
+                    <li><strong>XR Partner:</strong> Developing immersive, open-licensed XR environments.</li>
+                    <li><strong>AurinkoLab:</strong> Open hardware blueprints and the Attractiveness strand (Challenge).</li>
+                    <li><strong>CSC (Subcontractor):</strong> 2035+ foresight skills mapping.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- The 3-Step Methodology -->
+        <h3>The Hybrid Learning Methodology</h3>
+        <div class="grid-3">
+            <div class="card">
+                <h4>1. Build Safely (48V)</h4>
+                <p>Students manually build real, scalable energy systems (solar go-karts and boats) operating at a safe 48V. They learn the physical reality of solar PV, batteries, and telemetry.</p>
+            </div>
+            <div class="card">
+                <h4>2. Practice in XR (800V)</h4>
+                <p>High-risk scenarios are rehearsed in Virtual Reality. Students safely practice lockout/tagout, thermal runaway response, and managing EV fast-charging.</p>
+            </div>
+            <div class="card">
+                <h4>3. Verify AI (Data)</h4>
+                <p>An AI Co-pilot predicts energy output and diagnoses faults. Crucially, students must use a physical multimeter to verify the AI's hypothesis on the hardware.</p>
+            </div>
+        </div>
+
+        <!-- BUDGET SECTION WITH DOUGHNUT CHART -->
+        <h3>Budget Allocation & Rule Compliance</h3>
+        <p style="margin-bottom: 20px;">The €1M budget is structurally designed to comply with STEK’s strict limits on subcontracting and purchases, ensuring the vast majority of funds support salaries and core development across Higher Ed and VET partners.</p>
+        
+        <div class="budget-container">
+            <div class="chart-container">
+                <canvas id="budgetChart"></canvas>
+                <div class="chart-center-text">
+                    <div class="total">€1M</div>
+                    <div class="label">Total Budget</div>
+                </div>
+            </div>
+            <div class="budget-legend">
+                <div class="legend-item">
+                    <div><span class="legend-color" style="background-color: var(--color-lead);"></span><strong>Lead Uni (LUT/HY)</strong> - Management & Academy</div>
+                    <strong>32%</strong>
+                </div>
+                <div class="legend-item">
+                    <div><span class="legend-color" style="background-color: var(--color-xr);"></span><strong>XR Partner</strong> - Open VR Development</div>
+                    <strong>20%</strong>
+                </div>
+                <div class="legend-item">
+                    <div><span class="legend-color" style="background-color: var(--color-aurinko);"></span><strong>AurinkoLab</strong> - Hardware R&D & Challenge</div>
+                    <strong>19%</strong>
+                </div>
+                <div class="legend-item">
+                    <div><span class="legend-color" style="background-color: var(--color-varia);"></span><strong>Varia (VET)</strong> - Piloting & Pedagogy</div>
+                    <strong>16%</strong>
+                </div>
+                <div class="legend-item">
+                    <div>
+                        <span class="legend-color" style="background-color: var(--color-sub);"></span><strong>Subcontracting</strong> - CSC Foresight & Eval
+                        <span class="rule-badge">Pass: < 10% rule</span>
+                    </div>
+                    <strong>9%</strong>
+                </div>
+                <div class="legend-item">
+                    <div>
+                        <span class="legend-color" style="background-color: var(--color-pur);"></span><strong>Purchases</strong> - R&D Kits & Licenses
+                        <span class="rule-badge">Pass: < 5% rule</span>
+                    </div>
+                    <strong>4%</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alignment with STEK Criteria -->
+        <h3>Alignment with STEK Criteria</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>STEK Criterion</th>
+                    <th>Kart2Grid Solution</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="criterion">Cooperation & Coverage</td>
+                    <td>Led by higher education (LUT/HY) with strong vocational integration (Varia). Open hardware and XR modules ensure nationwide applicability.</td>
+                </tr>
+                <tr>
+                    <td class="criterion">Energy Transition Focus</td>
+                    <td>Modules directly address STEK's required themes: safety, battery technology, solar PV, smart grids, and data/AI integration.</td>
+                </tr>
+                <tr>
+                    <td class="criterion">Interaction</td>
+                    <td>Sustained via a national <strong>Teacher Academy</strong> and the annual <em>Solar Kart & Boat Challenge</em> connecting students with industry mentors.</td>
+                </tr>
+                <tr>
+                    <td class="criterion">Impact & Foresight</td>
+                    <td>Curriculum built directly on CSC's 2035+ skills map. Impact is tracked through module adoption rates and XR learning analytics.</td>
+                </tr>
+                <tr>
+                    <td class="criterion">Implementation & Leverage</td>
+                    <td>Phased execution matching STEK funding. XR content is openly licensed. Physical kit scaling is funded by industry sponsorships, acting as leverage.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Footer -->
+        <div class="footer">
+            Prepared for STEK Phase 1 Application Deadline: November 30, 2026<br>
+            <em>All STEK-funded educational content will be published under an Open License.</em>
+        </div>
+    </div>
+
+    <!-- Script to render the Chart -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ctx = document.getElementById('budgetChart').getContext('2d');
+            
+            // Get CSS variable colors for the chart
+            const rootStyles = getComputedStyle(document.documentElement);
+            const colorLead = rootStyles.getPropertyValue('--color-lead').trim();
+            const colorXr = rootStyles.getPropertyValue('--color-xr').trim();
+            const colorAurinko = rootStyles.getPropertyValue('--color-aurinko').trim();
+            const colorVaria = rootStyles.getPropertyValue('--color-varia').trim();
+            const colorSub = rootStyles.getPropertyValue('--color-sub').trim();
+            const colorPur = rootStyles.getPropertyValue('--color-pur').trim();
+
+            const data = {
+                labels: ['Lead Uni (32%)', 'XR Partner (20%)', 'AurinkoLab (19%)', 'Varia (16%)', 'Subcontracting (9%)', 'Purchases (4%)'],
+                datasets: [{
+                    data: [32, 20, 19, 16, 9, 4],
+                    backgroundColor: [colorLead, colorXr, colorAurinko, colorVaria, colorSub, colorPur],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 4
+                }]
+            };
+
+            const config = {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    responsive: true,
+                    cutout: '75%', // Makes it a thin ring to fit the text in the middle
+                    plugins: {
+                        legend: {
+                            display: false // We use our custom HTML legend instead
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label.replace(/ \([^)]*\)/, '') + ': €' + (context.raw * 10) + ',000';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            };
+
+            new Chart(ctx, config);
+        });
+    </script>
+</body>
+</html>
